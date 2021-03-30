@@ -5,7 +5,7 @@ fn main() {
     find("https://www.wowprogress.com/gearscore/us/char_rating/prev/1/lfg.1/raids_week./lang.en/class.paladin?sortby=ts");
 }
 
-fn get_character_name(cell: &std::string::String) -> String {
+fn get_character_name(cell: &str) -> String {
     let fragment = scraper::Html::parse_fragment(cell);
     let selector = scraper::Selector::parse("a").unwrap();
 
@@ -13,7 +13,7 @@ fn get_character_name(cell: &std::string::String) -> String {
     return String::from(atag.text().next().unwrap());
 }
 
-fn get_guild_name(cell: &std::string::String) -> String {
+fn get_guild_name(cell: &str) -> String {
     let fragment = scraper::Html::parse_fragment(cell);
     let selector = scraper::Selector::parse("nobr").unwrap();
 
