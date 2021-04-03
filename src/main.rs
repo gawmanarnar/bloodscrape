@@ -3,9 +3,9 @@ extern crate scraper;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let class = &args[1];
+    let arg = &args[1];
 
-    find(&format!("https://www.wowprogress.com/gearscore/us/char_rating/prev/1/lfg.1/raids_week./lang.en/class.{}?sortby=ts", class));
+    find(&format!("https://www.wowprogress.com/gearscore/us/char_rating/prev/1/lfg.1/raids_week./lang.en/class.{class}?sortby=ts", class = arg));
 }
 
 fn get_content(cell: &str, tag: &str) -> String {
