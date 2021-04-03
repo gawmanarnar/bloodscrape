@@ -2,7 +2,10 @@ extern crate reqwest;
 extern crate scraper;
 
 fn main() {
-    find("https://www.wowprogress.com/gearscore/us/char_rating/prev/1/lfg.1/raids_week./lang.en/class.paladin?sortby=ts");
+    let args: Vec<String> = std::env::args().collect();
+    let class = &args[1];
+
+    find(&format!("https://www.wowprogress.com/gearscore/us/char_rating/prev/1/lfg.1/raids_week./lang.en/class.{}?sortby=ts", class));
 }
 
 fn get_content(cell: &str, tag: &str) -> String {
