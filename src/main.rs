@@ -1,9 +1,13 @@
+#[macro_use]
+extern crate dotenv_codegen;
 extern crate reqwest;
 extern crate scraper;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let arg = &args[1];
+
+    println!("{}", dotenv!("WARCRAFTLOGS_API_KEY"));
 
     find(&format!("https://www.wowprogress.com/gearscore/us/char_rating/prev/1/lfg.1/raids_week./lang.en/class.{class}?sortby=ts", class = arg));
 }
