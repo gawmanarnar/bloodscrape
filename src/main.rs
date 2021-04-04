@@ -27,7 +27,8 @@ struct Character {
     realm: String,
     ilvl: f32,
     time: String,
-    logs: HashMap<u32, Log>,
+    heroic: HashMap<u32, Log>,
+    mythic: HashMap<u32, Log>,
 }
 
 fn main() {
@@ -108,7 +109,7 @@ fn process_realm(realm: &str) -> String {
 }
 
 fn get_logs(character: &mut Character, api_key: &str) {
-    let warcraftlogs_url = format!("https://www.warcraftlogs.com:443/v1/rankings/character/{character_name}/{realm}/{region}?api_key={key}",
+    let warcraftlogs_url = format!("https://www.warcraftlogs.com:443/v1/rankings/character/{character_name}/{realm}/{region}?timeframe=historical&api_key={key}",
                                     character_name = character.name.to_lowercase(),
                                     realm = process_realm(&character.realm),
                                     region = "us",
@@ -121,7 +122,11 @@ fn get_logs(character: &mut Character, api_key: &str) {
         .unwrap();
 
     for log in logs {
-        character.logs.insert(log.encounter_id, log);
+        if log.difficulty == 5 {
+            character.mythic.insert(log.encounter_id, log);
+        } else if log.difficulty == 4 {
+            character.heroic.insert(log.encounter_id, log);
+        }
     }
 
     println!("{:?}", character);
