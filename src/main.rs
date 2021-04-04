@@ -74,10 +74,10 @@ fn get_posted_time(cell: &str) -> String {
 
 fn get_ilvl(cell: &str) -> f32 {
     let float = cell.parse::<f32>();
-    if !float.is_ok() {
+    if float.is_err() {
         return 0.0;
     }
-    return float.unwrap();
+    float.unwrap()
 }
 
 fn make_character(entry: &table_extract::Row) -> Character {
@@ -93,11 +93,11 @@ fn make_character(entry: &table_extract::Row) -> Character {
         }
     }
 
-    return character;
+    character
 }
 
 fn process_realm(realm: &str) -> String {
-    return realm.replace(' ', "-").replace('\'', "").to_lowercase();
+    realm.replace(' ', "-").replace('\'', "").to_lowercase()
 }
 
 fn get_logs(character: &Character, api_key: &str) {
