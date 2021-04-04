@@ -6,16 +6,8 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-#[derive(Default, Debug)]
-struct Character {
-    name: String,
-    guild: String,
-    realm: String,
-    ilvl: f32,
-    time: String,
-}
-
 use serde::Deserialize;
+use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
 struct Log {
@@ -25,6 +17,17 @@ struct Log {
     encounter_name: String,
     #[serde(rename = "percentile")]
     parse: f64,
+    difficulty: i8,
+}
+
+#[derive(Default, Debug)]
+struct Character {
+    name: String,
+    guild: String,
+    realm: String,
+    ilvl: f32,
+    time: String,
+    logs: HashMap<u32, Log>,
 }
 
 fn main() {
@@ -39,6 +42,10 @@ fn main() {
 
     let api_key = dotenv!("WARCRAFTLOGS_API_KEY");
     for char in &mut characters {
+        if char.ilvl <= 210.0 {
+            continue;
+        }
+
         get_logs(char, api_key);
     }
 }
@@ -100,7 +107,7 @@ fn process_realm(realm: &str) -> String {
     realm.replace(' ', "-").replace('\'', "").to_lowercase()
 }
 
-fn get_logs(character: &Character, api_key: &str) {
+fn get_logs(character: &mut Character, api_key: &str) {
     let warcraftlogs_url = format!("https://www.warcraftlogs.com:443/v1/rankings/character/{character_name}/{realm}/{region}?api_key={key}",
                                     character_name = character.name.to_lowercase(),
                                     realm = process_realm(&character.realm),
@@ -113,7 +120,11 @@ fn get_logs(character: &Character, api_key: &str) {
         .json()
         .unwrap();
 
-    println!("{:?}", logs);
+    for log in logs {
+        character.logs.insert(log.encounter_id, log);
+    }
+
+    println!("{:?}", character);
 }
 
 fn find_characters(url: &str, characters: &mut Vec<Character>) {
