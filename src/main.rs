@@ -3,6 +3,8 @@ extern crate dotenv_codegen;
 extern crate reqwest;
 extern crate scraper;
 extern crate serde;
+extern crate serde_derive;
+extern crate serde_json;
 
 #[derive(Default, Debug)]
 struct Character {
@@ -11,6 +13,18 @@ struct Character {
     realm: String,
     ilvl: f32,
     time: String,
+}
+
+use serde::Deserialize;
+
+#[derive(Deserialize, Debug)]
+struct Log {
+    #[serde(rename = "encounterID")]
+    encounter_id: u32,
+    #[serde(rename = "encounterName")]
+    encounter_name: String,
+    #[serde(rename = "percentile")]
+    parse: f64,
 }
 
 fn main() {
@@ -94,6 +108,12 @@ fn get_logs(character: &Character, api_key: &str) {
                                     key = api_key);
 
     println!("{}", warcraftlogs_url);
+    let logs: Vec<Log> = reqwest::blocking::get(&warcraftlogs_url)
+        .unwrap()
+        .json()
+        .unwrap();
+
+    println!("{:?}", logs);
 }
 
 fn find_characters(url: &str, characters: &mut Vec<Character>) {
