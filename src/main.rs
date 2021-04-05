@@ -52,6 +52,24 @@ impl Character {
             parses = format!("{:.2}", sum / count)
         )
     }
+
+    fn get_color(&self) -> u32 {
+        match self.class.as_str() {
+            "deathknight" => 12852794,
+            "demon_hunter" => 10694857,
+            "druid" => 16743434,
+            "hunter" => 11195250,
+            "mage" => 4179947,
+            "monk" => 65432,
+            "paladin" => 16026810,
+            "priest" => 16777215,
+            "rogue" => 16774248,
+            "shaman" => 28893,
+            "warlock" => 8882414,
+            "warrior" => 13015917,
+            _ => 0,
+        }
+    }
 }
 
 fn main() {
@@ -188,7 +206,7 @@ fn post_discord(webhook: &str, client: &reqwest::blocking::Client, character: &C
                 "title": character.name,
                 "description": format!("{class}\n{realm}\n{ilvl}\n{mythic}", class = character.class, realm = character.realm, ilvl = character.ilvl, mythic = character.get_mythic()),
                 "url": link,
-                "color": 8882414,
+                "color": character.get_color(),
                 "fields": [
                     {
                       "name": "Warcraft Logs",
