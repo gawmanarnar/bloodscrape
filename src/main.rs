@@ -4,6 +4,7 @@ extern crate reqwest;
 extern crate scraper;
 extern crate serde;
 extern crate serde_derive;
+#[macro_use]
 extern crate serde_json;
 
 use serde::Deserialize;
@@ -23,6 +24,7 @@ struct Log {
 #[derive(Default, Debug)]
 struct Character {
     name: String,
+    class: String,
     guild: String,
     realm: String,
     ilvl: f32,
@@ -42,13 +44,23 @@ fn main() {
     find_characters(&wowprogress_url, &mut characters);
 
     let api_key = dotenv!("WARCRAFTLOGS_API_KEY");
+    let discord = dotenv!("DISCORD_WEBHOOK");
+    let client = reqwest::blocking::Client::new();
     for char in &mut characters {
         if char.ilvl <= 210.0 {
             continue;
         }
 
         get_logs(char, api_key);
+        if char.heroic.keys().len() == 0 {
+            continue;
+        }
+
+        char.class = arg.to_string();
+        post_discord(discord, &client, char);
     }
+
+    print!("{}", discord);
 }
 
 fn get_content(cell: &str, tag: &str) -> String {
@@ -128,7 +140,6 @@ fn get_logs(character: &mut Character, api_key: &str) {
             character.heroic.insert(log.encounter_id, log);
         }
     }
-
     println!("{:?}", character);
 }
 
@@ -138,4 +149,37 @@ fn find_characters(url: &str, characters: &mut Vec<Character>) {
     for row in &table {
         characters.push(make_character(&row));
     }
+}
+
+fn post_discord(webhook: &str, client: &reqwest::blocking::Client, character: &Character) {
+    let r = process_realm(&character.realm);
+    let c = character.name.to_lowercase();
+
+    let link = format!(
+        "https://www.warcraftlogs.com/character/us/{realm}/{character}",
+        realm = r,
+        character = c
+    );
+
+    let json = json!({
+        "embeds": [
+            {
+                "title": character.name,
+                "description": format!("{class}\n{realm}\n{ilvl}", class = character.class, realm = character.realm, ilvl = character.ilvl),
+                "url": link,
+                "fields": [
+                    {
+                      "name": "Warcraft Logs",
+                      "value": link
+                    },
+                    {
+                      "name": "Raider.io",
+                      "value": format!("https://raider.io/characters/us/{realm}/{class}", realm = r, class = c)
+                    }
+                ]
+            }
+        ]
+    }
+    );
+    client.post(webhook).json(&json).send().unwrap();
 }
