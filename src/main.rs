@@ -33,6 +33,27 @@ struct Character {
     mythic: HashMap<u32, Log>,
 }
 
+impl Character {
+    fn get_mythic(&self) -> String {
+        let count: f64 = self.mythic.keys().len() as f64;
+
+        if count == 0.0 {
+            return String::new();
+        }
+
+        let mut sum: f64 = 0.0;
+        for log in self.mythic.values() {
+            sum += log.parse;
+        }
+
+        format!(
+            "{kills}/10M Performance: {parses}",
+            kills = count,
+            parses = format!("{:.2}", sum / count)
+        )
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let arg = &args[1];
@@ -165,8 +186,9 @@ fn post_discord(webhook: &str, client: &reqwest::blocking::Client, character: &C
         "embeds": [
             {
                 "title": character.name,
-                "description": format!("{class}\n{realm}\n{ilvl}", class = character.class, realm = character.realm, ilvl = character.ilvl),
+                "description": format!("{class}\n{realm}\n{ilvl}\n{mythic}", class = character.class, realm = character.realm, ilvl = character.ilvl, mythic = character.get_mythic()),
                 "url": link,
+                "color": 8882414,
                 "fields": [
                     {
                       "name": "Warcraft Logs",
